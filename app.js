@@ -4,18 +4,18 @@ import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.
 
 // Replace these values with the Web App config from Firebase Project Settings.
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_FIREBASE_API_KEY",
-  authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
-  projectId: "PASTE_YOUR_PROJECT_ID",
-  storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID",
-  appId: "PASTE_YOUR_APP_ID"
+  apiKey: "AIzaSyDU9UzWb0tNicMOLZ6K01TGJ4-xrLEu-aQ",
+  authDomain: "sendpilot-bf3b0.firebaseapp.com",
+  projectId: "sendpilot-bf3b0",
+  storageBucket: "sendpilot-bf3b0.firebasestorage.app",
+  messagingSenderId: "711768959361",
+  appId: "1:711768959361:web:35c6a722ae3fd40031a080",
+  measurementId: "G-TX5KVCJ2TM"
 };
 
-const configured = !Object.values(firebaseConfig).some(v => v.startsWith("PASTE_"));
-const app = configured ? initializeApp(firebaseConfig) : null;
-const auth = app ? getAuth(app) : null;
-const db = app ? getFirestore(app) : null;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 const modal=document.querySelector("#authModal"), form=document.querySelector("#authForm"), title=document.querySelector("#authTitle"), subtitle=document.querySelector("#authSubtitle"), submit=document.querySelector("#authSubmit"), switchBtn=document.querySelector("#switchAuth"), status=document.querySelector("#authStatus");
 let signup=true;
