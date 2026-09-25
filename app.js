@@ -23,7 +23,6 @@ function openAuth(mode=true){signup=mode; title.textContent=signup?"Welcome to S
 function closeAuth(){modal.classList.add("hidden");form.reset();status.textContent=""}
 document.querySelector("#signupBtn").onclick=()=>openAuth(true); document.querySelector("#heroStart").onclick=()=>openAuth(true); document.querySelector("#loginBtn").onclick=()=>openAuth(false); document.querySelector("#heroLogin").onclick=()=>openAuth(false); document.querySelector("#closeModal").onclick=closeAuth; switchBtn.onclick=()=>openAuth(!signup);
 form.addEventListener("submit",async e=>{e.preventDefault();status.textContent="";
- if(!configured){status.textContent="Firebase config अभी app.js में add करना है.";return}
  const email=document.querySelector("#email").value.trim(), password=document.querySelector("#password").value;
  try{
   const cred=signup?await createUserWithEmailAndPassword(auth,email,password):await signInWithEmailAndPassword(auth,email,password);
