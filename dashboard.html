@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SendPilot — Dashboard</title><link rel="stylesheet" href="style.css">
+<style>
+body{background:#080a10}.dashboard{min-height:100vh;display:flex}.dash-side{width:230px;border-right:1px solid #ffffff10;padding:22px 14px;background:#0b0e15}.dash-side .brand{margin:0 8px 35px}.dash-nav{display:grid;gap:5px}.dash-nav button{border:0;background:transparent;color:#858c9d;text-align:left;padding:12px;border-radius:9px;cursor:pointer}.dash-nav button.active,.dash-nav button:hover{background:#7777ff18;color:#c5c6ff}.dash-main{flex:1;padding:35px;max-width:1200px}.dash-main h1{font:600 32px 'Space Grotesk';margin:0 0 7px}.muted{color:#858c9d}.topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.logout{padding:10px 14px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{border:1px solid #ffffff10;background:#ffffff05;border-radius:14px;padding:20px}.card small{color:#70788a;letter-spacing:1px;font-size:10px}.card strong{display:block;font:600 27px 'Space Grotesk';margin-top:10px}.panel{margin-top:15px;border:1px solid #ffffff10;background:#ffffff04;border-radius:15px;padding:22px}.panel h2{font:600 18px 'Space Grotesk';margin:0 0 7px}.empty{padding:35px 10px;text-align:center;color:#777f91}@media(max-width:800px){.dash-side{width:70px}.dash-side .brand span,.dash-nav button span{display:none}.dash-main{padding:20px}.cards{grid-template-columns:1fr 1fr}}
+</style></head>
+<body>
+<div class="dashboard">
+<aside class="dash-side"><a class="brand" href="index.html"><span class="brand-mark">S</span><span>SendPilot</span></a>
+<nav class="dash-nav"><button class="active">◈ <span>Overview</span></button><button>◎ <span>Contacts</span></button><button>▣ <span>Campaigns</span></button><button>◌ <span>Reports</span></button></nav></aside>
+<main class="dash-main"><div class="topline"><div><h1>Campaign overview</h1><div class="muted">Your messaging workspace at a glance.</div></div><button class="btn ghost logout" id="logout">Log out</button></div>
+<div class="cards"><div class="card"><small>CONTACTS</small><strong id="contacts">0</strong></div><div class="card"><small>CAMPAIGNS</small><strong id="campaigns">0</strong></div><div class="card"><small>MESSAGES</small><strong id="messages">0</strong></div><div class="card"><small>PLAN</small><strong>Free</strong></div></div>
+<div class="panel"><h2>Ready to build your first campaign?</h2><div class="muted">Next: import opted-in contacts, create a personalized message, and connect the official WhatsApp Business API.</div><div class="empty">Contacts & Campaigns modules will be added next.</div></div>
+</main></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getAuth,onAuthStateChanged,signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+const firebaseConfig={apiKey:"PASTE_YOUR_FIREBASE_API_KEY",authDomain:"PASTE_YOUR_PROJECT.firebaseapp.com",projectId:"PASTE_YOUR_PROJECT_ID",storageBucket:"PASTE_YOUR_STORAGE_BUCKET",messagingSenderId:"PASTE_YOUR_SENDER_ID",appId:"PASTE_YOUR_APP_ID"};
+if(!Object.values(firebaseConfig).some(v=>v.startsWith("PASTE_"))){const auth=getAuth(initializeApp(firebaseConfig));onAuthStateChanged(auth,u=>{if(!u)location.href="index.html"});document.querySelector("#logout").onclick=()=>signOut(auth).then(()=>location.href="index.html");}
+else document.querySelector("#logout").onclick=()=>location.href="index.html";
+</script></body></html>
