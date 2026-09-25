@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SendPilot — modern campaign management for opted-in WhatsApp communications.">
+  <title>SendPilot — Campaign Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="orb orb-one"></div><div class="orb orb-two"></div>
+  <header class="nav">
+    <a class="brand" href="#"><span class="brand-mark">S</span><span>SendPilot</span></a>
+    <div class="nav-actions">
+      <button class="btn ghost" id="loginBtn">Log in</button>
+      <button class="btn primary" id="signupBtn">Get started</button>
+    </div>
+  </header>
+  <main class="hero">
+    <section class="hero-copy">
+      <div class="eyebrow">CAMPAIGN CONTROL CENTER</div>
+      <h1>Plan conversations.<br><span>Send with confidence.</span></h1>
+      <p>Manage contacts, create personalized campaigns, and track message activity from one clean workspace.</p>
+      <div class="hero-actions">
+        <button class="btn primary large" id="heroStart">Create your workspace <span>→</span></button>
+        <button class="btn ghost large" id="heroLogin">I already have an account</button>
+      </div>
+      <div class="trust"><span>✓</span> Built for permission-based messaging</div>
+    </section>
+    <section class="preview">
+      <div class="window">
+        <div class="window-top"><div class="dots"><i></i><i></i><i></i></div><span>SendPilot / Overview</span><b>● LIVE</b></div>
+        <div class="window-body">
+          <div class="side"><div class="mini-logo">S</div><div class="side-item active">Overview</div><div class="side-item">Contacts</div><div class="side-item">Campaigns</div><div class="side-item">Reports</div></div>
+          <div class="dash">
+            <div class="dash-title"><div><small>MONITOR</small><h3>Campaign overview</h3></div><span class="pill">This week</span></div>
+            <div class="stats"><div><small>CONTACTS</small><strong>1,000</strong><em>+12.4%</em></div><div><small>CAMPAIGNS</small><strong>24</strong><em>+8.2%</em></div><div><small>DELIVERED</small><strong>94.8%</strong><em>+3.1%</em></div></div>
+            <div class="chart"><div class="chart-head"><span>Message activity</span><small>Last 7 days</small></div><div class="bars"><i style="height:38%"></i><i style="height:56%"></i><i style="height:47%"></i><i style="height:76%"></i><i style="height:64%"></i><i style="height:88%"></i><i style="height:72%"></i></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <section class="features"><div><b>01</b><h3>Smart contacts</h3><p>Import and organize contacts with groups and tags.</p></div><div><b>02</b><h3>Campaign builder</h3><p>Personalize messages and prepare compliant campaigns.</p></div><div><b>03</b><h3>Clear reporting</h3><p>See campaign progress and delivery activity.</p></div></section>
+  <div class="modal hidden" id="authModal"><div class="modal-card"><button class="close" id="closeModal">×</button><div class="modal-logo">S</div><h2 id="authTitle">Welcome to SendPilot</h2><p id="authSubtitle">Create your workspace to continue.</p><form id="authForm"><label>Email<input id="email" type="email" placeholder="you@example.com" required></label><label>Password<input id="password" type="password" placeholder="Minimum 6 characters" minlength="6" required></label><button class="btn primary full" id="authSubmit">Create account</button></form><div class="switch">Already registered? <button id="switchAuth">Log in</button></div><div id="authStatus" class="status"></div></div></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
