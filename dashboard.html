@@ -9,7 +9,7 @@ body{background:#080a10}.dashboard{min-height:100vh;display:flex}.dash-side{widt
 <body>
 <div class="dashboard">
 <aside class="dash-side"><a class="brand" href="index.html"><span class="brand-mark">S</span><span>SendPilot</span></a>
-<nav class="dash-nav"><button class="active">◈ <span>Overview</span></button><button>◎ <span>Contacts</span></button><button>▣ <span>Campaigns</span></button><button>◌ <span>Reports</span></button></nav></aside>
+<nav class="dash-nav"><button class="active" onclick="location.href='dashboard.html'">◈ <span>Overview</span></button><button onclick="location.href='contacts.html'">◎ <span>Contacts</span></button><button onclick="location.href='campaigns.html'">▣ <span>Campaigns</span></button><button onclick="location.href='reports.html'">◌ <span>Reports</span></button></nav></aside>
 <main class="dash-main"><div class="topline"><div><h1>Campaign overview</h1><div class="muted">Your messaging workspace at a glance.</div></div><button class="btn ghost logout" id="logout">Log out</button></div>
 <div class="cards"><div class="card"><small>CONTACTS</small><strong id="contacts">0</strong></div><div class="card"><small>CAMPAIGNS</small><strong id="campaigns">0</strong></div><div class="card"><small>MESSAGES</small><strong id="messages">0</strong></div><div class="card"><small>PLAN</small><strong>Free</strong></div></div>
 <div class="panel"><h2>Ready to build your first campaign?</h2><div class="muted">Next: import opted-in contacts, create a personalized message, and connect the official WhatsApp Business API.</div><div class="empty">Contacts & Campaigns modules will be added next.</div></div>
