@@ -1,0 +1,11 @@
+{
+  "name": "sendpilot-functions",
+  "description": "Secure WhatsApp Cloud API backend for SendPilot",
+  "engines": { "node": "20" },
+  "main": "index.js",
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "private": true
+}
