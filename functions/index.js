@@ -5,17 +5,65 @@ const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
 initializeApp();
 const db = getFirestore();
-
 const WHATSAPP_CONFIG = defineJsonSecret("WHATSAPP_CONFIG");
+const BATCH_SIZE = 25;
 
-exports.sendCampaign = onCall(
+function cleanPhone(value) {
+  return String(value || "").replace(/[^0-9]/g, "");
+}
+
+async function claimQueuedMessage(ref, uid) {
+  return db.runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return null;
+    const data = snap.data();
+    if (data.userId !== uid || data.status !== "queued") return null;
+    tx.update(ref, {
+      status: "processing",
+      processingAt: FieldValue.serverTimestamp()
+    });
+    return { id: snap.id, ...data };
+  });
+}
+
+async function sendText(config, phone, body) {
+  const version = config.apiVersion || config.graphVersion || "v23.0";
+  const url = `https://graph.facebook.com/${version}/${config.phoneNumberId}/messages`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.accessToken}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to: phone,
+      type: "text",
+      text: { preview_url: false, body }
+    })
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(
+      data?.error?.message ||
+      data?.error?.error_user_msg ||
+      `WhatsApp API HTTP ${response.status}`
+    );
+  }
+  return data;
+}
+
+exports.sendWhatsAppBatch = onCall(
   {
-    region: "us-central1",
+    region: "asia-south1",
     timeoutSeconds: 540,
-    memory: "512MiB",
+    memory: "256MiB",
     secrets: [WHATSAPP_CONFIG]
   },
-  async (request) => {
+  async request => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Please sign in.");
     }
@@ -34,108 +82,100 @@ exports.sendCampaign = onCall(
     }
 
     const campaign = campaignSnap.data();
-    if (campaign.status === "sending") {
-      throw new HttpsError("already-exists", "Campaign is already sending.");
+    if (campaign.optInConfirmed !== true) {
+      throw new HttpsError(
+        "failed-precondition",
+        "Confirm that the selected contacts have WhatsApp opt-in."
+      );
     }
 
     const config = WHATSAPP_CONFIG.value();
-    const accessToken = config.accessToken;
-    const phoneNumberId = config.phoneNumberId;
-    const graphVersion = config.graphVersion;
-
-    if (!accessToken || !phoneNumberId || !graphVersion) {
-      throw new HttpsError("failed-precondition", "WhatsApp backend is not configured.");
+    if (!config?.accessToken || !config?.phoneNumberId) {
+      throw new HttpsError(
+        "failed-precondition",
+        "WhatsApp backend is not configured. Set WHATSAPP_CONFIG."
+      );
     }
 
-    await campaignRef.update({
-      status: "sending",
-      startedAt: FieldValue.serverTimestamp(),
-      error: null
-    });
-
-    const messagesSnap = await db.collection("messages")
+    const queued = await db.collection("messages")
       .where("campaignId", "==", campaignId)
       .where("userId", "==", uid)
       .where("status", "==", "queued")
-      .limit(1000)
+      .limit(BATCH_SIZE)
       .get();
+
+    if (queued.empty) {
+      await campaignRef.update({
+        status: "completed",
+        completedAt: FieldValue.serverTimestamp()
+      });
+      return { done: true, processed: 0, sent: 0, failed: 0, remaining: 0 };
+    }
 
     let sent = 0;
     let failed = 0;
-    const errors = [];
 
-    for (const doc of messagesSnap.docs) {
-      const msg = doc.data();
-
-      // Safety gate: only send contacts explicitly marked as opted-in.
-      if (msg.optIn !== true) {
-        await doc.ref.update({
-          status: "blocked",
-          error: "Contact has no explicit WhatsApp opt-in.",
-          updatedAt: FieldValue.serverTimestamp()
-        });
-        failed++;
-        continue;
-      }
+    for (const queuedDoc of queued.docs) {
+      const msg = await claimQueuedMessage(queuedDoc.ref, uid);
+      if (!msg) continue;
 
       try {
-        const response = await fetch(
-          `https://graph.facebook.com/${graphVersion}/${phoneNumberId}/messages`,
-          {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${accessToken}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              messaging_product: "whatsapp",
-              recipient_type: "individual",
-              to: String(msg.phone).replace(/\\D/g, ""),
-              type: "text",
-              text: { preview_url: false, body: msg.message }
-            })
-          }
-        );
+        const contactSnap = await db.collection("contacts").doc(msg.contactId).get();
+        const contact = contactSnap.exists ? contactSnap.data() : null;
 
-        const body = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(body?.error?.message || `WhatsApp API HTTP ${response.status}`);
+        if (!contact || contact.userId !== uid) {
+          throw new Error("Contact not found.");
+        }
+        if (contact.optIn !== true) {
+          throw new Error("Contact is not marked as opted-in.");
         }
 
-        const waMessageId = body?.messages?.[0]?.id || null;
-        await doc.ref.update({
+        const phone = cleanPhone(msg.phone || contact.phone);
+        if (!phone) throw new Error("Contact has no valid phone number.");
+
+        const apiResult = await sendText(config, phone, msg.message);
+
+        await queuedDoc.ref.update({
           status: "sent",
-          whatsappMessageId: waMessageId,
           sentAt: FieldValue.serverTimestamp(),
-          updatedAt: FieldValue.serverTimestamp()
+          whatsappMessageId: apiResult?.messages?.[0]?.id || null
         });
         sent++;
-      } catch (err) {
-        await doc.ref.update({
+      } catch (error) {
+        await queuedDoc.ref.update({
           status: "failed",
-          error: String(err.message || err).slice(0, 500),
-          updatedAt: FieldValue.serverTimestamp()
+          failedAt: FieldValue.serverTimestamp(),
+          error: String(error.message || error).slice(0, 1000)
         });
         failed++;
-        if (errors.length < 10) errors.push(String(err.message || err));
       }
+
+      await new Promise(resolve => setTimeout(resolve, 250));
     }
 
-    const finalStatus = failed === 0 ? "sent" : (sent > 0 ? "partial" : "failed");
+    const remainingSnap = await db.collection("messages")
+      .where("campaignId", "==", campaignId)
+      .where("userId", "==", uid)
+      .where("status", "==", "queued")
+      .limit(1)
+      .get();
+
+    const remaining = remainingSnap.size > 0;
+
     await campaignRef.update({
-      status: finalStatus,
-      sentCount: String(sent),
-      failedCount: String(failed),
-      finishedAt: FieldValue.serverTimestamp()
+      status: remaining ? "sending" : "completed",
+      sentCount: FieldValue.increment(sent),
+      failedCount: FieldValue.increment(failed),
+      lastRunAt: FieldValue.serverTimestamp(),
+      ...(remaining ? {} : { completedAt: FieldValue.serverTimestamp() })
     });
 
     return {
-      campaignId,
-      status: finalStatus,
+      done: !remaining,
+      processed: sent + failed,
       sent,
       failed,
-      errors
+      remaining: remaining ? 1 : 0
     };
   }
 );
