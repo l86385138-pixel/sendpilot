@@ -17,7 +17,7 @@ body{background:#080a10}.dashboard{min-height:100vh;display:flex}.dash-side{widt
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth,onAuthStateChanged,signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-const firebaseConfig={apiKey:"PASTE_YOUR_FIREBASE_API_KEY",authDomain:"PASTE_YOUR_PROJECT.firebaseapp.com",projectId:"PASTE_YOUR_PROJECT_ID",storageBucket:"PASTE_YOUR_STORAGE_BUCKET",messagingSenderId:"PASTE_YOUR_SENDER_ID",appId:"PASTE_YOUR_APP_ID"};
+const firebaseConfig={apiKey:"AIzaSyDU9UzWb0tNicMOLZ6K01TGJ4-xrLEu-aQ",authDomain:"sendpilot-bf3b0.firebaseapp.com",projectId:"sendpilot-bf3b0",storageBucket:"sendpilot-bf3b0.firebasestorage.app",messagingSenderId:"711768959361",appId:"1:711768959361:web:35c6a722ae3fd40031a080",measurementId:"G-TX5KVCJ2TM"};
 if(!Object.values(firebaseConfig).some(v=>v.startsWith("PASTE_"))){const auth=getAuth(initializeApp(firebaseConfig));onAuthStateChanged(auth,u=>{if(!u)location.href="index.html"});document.querySelector("#logout").onclick=()=>signOut(auth).then(()=>location.href="index.html");}
 else document.querySelector("#logout").onclick=()=>location.href="index.html";
 </script></body></html>
